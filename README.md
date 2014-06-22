@@ -3,96 +3,40 @@ GettingandCleaningData
     
     # Project Course
     
-    ## place file "UCI HAR DATASETS" on root level in order to find the right path to data
-    ## Output is saved as tab separate text format
-    
-    
-    
-    run_analysis <- function(){
-        
-        #LIBRARIES
-        library(data.table);
-        library(stringr)
-        
-        # ESTABLISH PATHS
-        path.data <- paste0(getwd(), "/UCI HAR Dataset/");
-        
-        # GET DATA
-        test_X <- as.data.table(read.table(paste0(path.data, "test/X_test.txt")));
-        test_Y <- as.data.table(read.table(paste0(path.data, "test/y_test.txt")));
-        test_S <- as.data.table(read.table(paste0(path.data, "test/subject_test.txt")));
-        train_X <- as.data.table(read.table(paste0(path.data, "train/X_train.txt")));
-        train_Y <- as.data.table(read.table(paste0(path.data, "train/y_train.txt")));
-        train_S <- as.data.table(read.table(paste0(path.data, "train/subject_train.txt")));
-        
-        data.F <- as.data.table(read.table(paste0(path.data, "features.txt")));
-        data.A <- as.data.table(read.table(paste0(path.data, "activity_labels.txt")));
-        
-        
-        # Look for index on variables MEAN and STD
-        pos.mean <- as.vector(regexpr("mean", data.F$V2));
-        pos.mean <- which(pos.mean > 0);
-        pos.meanFreq <- as.vector(regexpr("meanFreq", data.F$V2));
-        pos.meanFreq <- which(pos.meanFreq > 0);
-        pos.mean <- setdiff(pos.mean, pos.meanFreq);
-        pos.std <- as.vector(regexpr("std", data.F$V2));
-        pos.std <- which(pos.std > 0);
-        idx <- sort(c(pos.mean, pos.std));
-        
-        
-        #prueba
-        # SET DECRIPTIVE VARIABLE NAMES
-        # setnames(test_X, 1:ncol(test_X), as.character(data.F$DESC));
-        # setnames(train_X, 1:ncol(train_X), as.character(data.F$DESC));
-        data.F.desc <- str_replace_all(as.character(data.F$DESC), "[[:punct:]]", "");
-        setnames(test_X, 1:ncol(test_X), as.character(data.F.desc));
-        setnames(train_X, 1:ncol(train_X), as.character(data.F.desc));
-        
-        # PRINT DIMENSION OF DATA TABLES
-        print(dim(test_X));
-        print(dim(test_Y));
-        print(dim(train_X));
-        print(dim(train_Y));
-        
-        # CREATE DESCRIPTIVE NAMES FOR ACTIVITY AND TYPE (TEST OR TRAIN)
-        setkey(data.A, ACT);
-        # FOR TEST
-        setnames(test_Y, 1, "ACT");
-        setkey(test_Y, ACT);  
-        DescActTest <- merge(test_Y, data.A);
-        IdTest <- cbind(TYPE=rep("TEST", nrow(test_X)), DescActTest, test_S);
-        setnames(IdTest, 4, "SUBJ");
-        # FOR TRAIN
-        setnames(train_Y, 1, "ACT");
-        setkey(train_Y, ACT);  
-        DescActTrain <- merge(train_Y, data.A);
-        IdTrain <- cbind(TYPE=rep("TRAIN", nrow(train_X)), DescActTrain, train_S);
-        setnames(IdTrain, 4, "SUBJ");
-        
-        # SELECT VARIABLES WITH MEAN AND STD; ADD ID
-        # FOR TEST
-        TestMeanStd <- test_X[, idx, with=FALSE];
-        TestMeanStd <- cbind(IdTest, TestMeanStd);  
-        # FOR TRAIN
-        TrainMeanStd <- train_X[, idx, with=FALSE];
-        TrainMeanStd <- cbind(IdTrain, TrainMeanStd);
-        
-        # JOIN TEST AND TRAIN IN ONE TIDY TABLE
-        TestTrain <- rbind(TestMeanStd, TrainMeanStd);
-        print(head(TestTrain[, 1:5, with=FALSE]));
-        print(tail(TestTrain[, 1:5, with=FALSE]));
-        
-        
-        # GET MEANS OF FEATURES GROUPED BY ACTIVITY AND SUBJECT
-        TestTrainMean <- TestTrain[, list(mean(tBodyAccmeanX), mean(tBodyAccmeanY), mean(tBodyAccmeanZ), mean(tBodyAccstdX), mean(tBodyAccstdY), mean(tBodyAccstdZ), mean(tGravityAccmeanX), mean(tGravityAccmeanY), mean(tGravityAccmeanZ), mean(tGravityAccstdX), mean(tGravityAccstdY), mean(tGravityAccstdZ), mean(tBodyAccJerkmeanX), mean(tBodyAccJerkmeanY), mean(tBodyAccJerkmeanZ), mean(tBodyAccJerkstdX), mean(tBodyAccJerkstdY), mean(tBodyAccJerkstdZ), mean(tBodyGyromeanX), mean(tBodyGyromeanY), mean(tBodyGyromeanZ), mean(tBodyGyrostdX), mean(tBodyGyrostdY), mean(tBodyGyrostdZ), mean(tBodyGyroJerkmeanX), mean(tBodyGyroJerkmeanY), mean(tBodyGyroJerkmeanZ), mean(tBodyGyroJerkstdX), mean(tBodyGyroJerkstdY), mean(tBodyGyroJerkstdZ), mean(tBodyAccMagmean), mean(tBodyAccMagstd), mean(tGravityAccMagmean), mean(tGravityAccMagstd), mean(tBodyAccJerkMagmean), mean(tBodyAccJerkMagstd), mean(tBodyGyroMagmean), mean(tBodyGyroMagstd), mean(tBodyGyroJerkMagmean), mean(tBodyGyroJerkMagstd), mean(fBodyAccmeanX), mean(fBodyAccmeanY), mean(fBodyAccmeanZ), mean(fBodyAccstdX), mean(fBodyAccstdY), mean(fBodyAccstdZ), mean(fBodyAccJerkmeanX), mean(fBodyAccJerkmeanY), mean(fBodyAccJerkmeanZ), mean(fBodyAccJerkstdX), mean(fBodyAccJerkstdY), mean(fBodyAccJerkstdZ), mean(fBodyGyromeanX), mean(fBodyGyromeanY), mean(fBodyGyromeanZ), mean(fBodyGyrostdX), mean(fBodyGyrostdY), mean(fBodyGyrostdZ), mean(fBodyAccMagmean), mean(fBodyAccMagstd), mean(fBodyBodyAccJerkMagmean), mean(fBodyBodyAccJerkMagstd), mean(fBodyBodyGyroMagmean), mean(fBodyBodyGyroMagstd), mean(fBodyBodyGyroJerkMagmean), mean(fBodyBodyGyroJerkMagstd)), by=list(DESC, SUBJ)];
-        
-        setnames(TestTrainMean, 3:ncol(TestTrainMean), paste0("M", data.F.desc[idx]));
-        print(head(TestTrainMean));
-        print(dim(TestTrainMean)); 
-        print(dim(TestTrain));
-        
-        #file txt
-        #write.table(TestTrainMean,paste0(path.data,"TestTrainMean.txt"),sep="\t" ,row.names=FALSE)
-        
-        
-    }
+* The data linked to from the course website represent data collected from the accelerometers from the Samsung Galaxy S smartphone.
+   
+   
+* The experiments have been carried out with a group of 30 volunteers within an age bracket of 19-48 years. Each person performed six activities (WALKING, WALKING_UPSTAIRS, WALKING_DOWNSTAIRS, SITTING, STANDING, LAYING) wearing a smartphone (Samsung Galaxy S II) on the waist. Using its embedded accelerometer and gyroscope, we captured 3-axial linear acceleration and 3-axial angular velocity at a constant rate of 50Hz. The experiments have been video-recorded to label the data manually. The obtained dataset has been randomly partitioned into two sets, where 70% of the volunteers was selected for generating the training data and 30% the test data.
+
+* The sensor signals (accelerometer and gyroscope) were pre-processed by applying noise filters and then sampled in fixed-width sliding windows of 2.56 sec and 50% overlap (128 readings/window). The sensor acceleration signal, which has gravitational and body motion components, was separated using a Butterworth low-pass filter into body acceleration and gravity. The gravitational force is assumed to have only low frequency components, therefore a filter with 0.3 Hz cutoff frequency was used. From each window, a vector of features was obtained by calculating variables from the time and frequency domain.
+
+* Check the Codebook.md  file for further details about this dataset. 
+
+
+   
+## I create one R script called run_analysis.R that does the following: 
+
+    1. Merges the training and the test sets to create one data set.
+    2. Extracts only the measurements on the mean and standard deviation for each measurement. 
+    3. Uses descriptive activity names to name the activities in the data set
+    4. Appropriately labels the data set with descriptive variable names. 
+    5. Creates a second, independent tidy data set with the average of each variable for each activity and each subject. 
+
+
+### Exactly
+
+* Get libraries 
+* EStablish paths 
+* Get data 
+* Loook for index on variables "mean" and "std" 
+* Set descriptive names to data
+* Set descriptive variable names   
+* Print dimensions of data tables
+* Create descriptive names for activity and type "test" or "train" 
+* Select variables with "mean" and "std" and add "id"
+* Join "test" and "train" in one tidy table
+* Get means of features gruoped by activity and subject
+* Write tidy data how txt file.
+
+* Check the Run_analysis. R file for further details. 
+
