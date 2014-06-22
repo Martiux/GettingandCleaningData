@@ -1,7 +1,7 @@
 GettingandCleaningData
 ======================
     
-    # Project Course
+# Project Course
     
 * The data linked to from the course website represent data collected from the accelerometers from the Samsung Galaxy S smartphone.
    
