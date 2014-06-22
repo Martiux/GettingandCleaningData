@@ -5,7 +5,7 @@ run_analysis <- function(){
   library(stringr)
   
   # ESTABLISH PATHS
-  path.data <- paste0(getwd(), "/c3_data/UCI HAR Dataset/");
+  path.data <- paste0(getwd(), "/UCI HAR Dataset/");
   
   # GET DATA
   test_X <- as.data.table(read.table(paste0(path.data, "test/X_test.txt")));
@@ -81,7 +81,7 @@ run_analysis <- function(){
   setnames(TestTrainMean, 3:ncol(TestTrainMean), paste0("M", data.F.desc[idx]));
   print(head(TestTrainMean));
   print(dim(TestTrainMean)); 
-  print(dim(TestTrain));
+  print(TestTrainMean);
 
 
 }
